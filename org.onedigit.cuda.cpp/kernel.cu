@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 10
+#define N 513
 
 __global__ void add(int a, int b, int *c)
 {
@@ -15,9 +15,10 @@ __global__ void add(int a, int b, int *c)
 
 __global__ void vecAddDevice(int* a, int* b, int* c)
 {
-	int gx = gridDim.x;
-	int gy = gridDim.y;
-	int tid = blockIdx.x; 
+	// int gx = gridDim.x;
+	// int gy = gridDim.y;
+	// int tid = blockIdx.x; 
+	int tid = threadIdx.x; 
 	/* printf("tid = %d\n", tid); */
 	if (tid < N) {
 		c[tid] = a[tid] + b[tid];
@@ -79,18 +80,23 @@ void vecAdd()
         exit(EXIT_FAILURE);
     }
 
-	vecAddDevice<<<N, 1>>>(dev_a, dev_b, dev_c);
+	vecAddDevice<<<1, N>>>(dev_a, dev_b, dev_c);
+	cudaError_t lauchSuccess = cudaGetLastError();
+	if (lauchSuccess != cudaSuccess) {
+        printf("Lauching vecAddDevice returned error %s, line(%d)\n", cudaGetErrorString(lauchSuccess), __LINE__);
+		exit(EXIT_FAILURE);
+	}
 	
 	error = cudaMemcpy(c, dev_c, N * sizeof(int), cudaMemcpyDeviceToHost);
     if (error != cudaSuccess) {
         printf("cudaMemcpy returned error code %d, line(%d)\n", error, __LINE__);
         exit(EXIT_FAILURE);
     }
-	/*
+
 	for (int i = 0; i < N; i++) {
 		std::cout << a[i] << "+" << b[i] << " = " << c[i] << std::endl;
 	}
-	*/
+
 }
 
 void test()
