@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 513
+#define N (8388480 * 2)
 
 __global__ void add(int a, int b, int *c)
 {
@@ -18,10 +18,13 @@ __global__ void vecAddDevice(int* a, int* b, int* c)
 	// int gx = gridDim.x;
 	// int gy = gridDim.y;
 	// int tid = blockIdx.x; 
-	int tid = threadIdx.x; 
+	int tid = threadIdx.x + blockIdx.x * blockDim.x; 
 	/* printf("tid = %d\n", tid); */
-	if (tid < N) {
+	while (tid < N) {
 		c[tid] = a[tid] + b[tid];
+		// Increment tid by the total number of threads running in the grid.
+		// This is simply the number of threads per block * the number of blocks in the grid
+		tid += blockDim.x * gridDim.x;
 	}
 }
 
@@ -48,7 +51,9 @@ void vecAdd()
 {
 	getDevice();
 
-	int a[N], b[N], c[N];
+	int* a = new int[N];
+	int* b = new int[N];
+	int* c = new int[N];
 	int *dev_a, *dev_b, *dev_c;
 	int error = cudaMalloc( (void**)&dev_a, N * sizeof(int) );
     if (error != cudaSuccess) {
@@ -80,7 +85,9 @@ void vecAdd()
         exit(EXIT_FAILURE);
     }
 
-	vecAddDevice<<<1, N>>>(dev_a, dev_b, dev_c);
+	int numBlocks = 128;
+	int threadsPerBlock = 128;
+	vecAddDevice<<< numBlocks, threadsPerBlock >>>(dev_a, dev_b, dev_c);
 	cudaError_t lauchSuccess = cudaGetLastError();
 	if (lauchSuccess != cudaSuccess) {
         printf("Lauching vecAddDevice returned error %s, line(%d)\n", cudaGetErrorString(lauchSuccess), __LINE__);
@@ -92,11 +99,17 @@ void vecAdd()
         printf("cudaMemcpy returned error code %d, line(%d)\n", error, __LINE__);
         exit(EXIT_FAILURE);
     }
-
+	/*
 	for (int i = 0; i < N; i++) {
 		std::cout << a[i] << "+" << b[i] << " = " << c[i] << std::endl;
 	}
-
+	*/
+	delete[] a;
+	delete[] b;
+	delete[] c;
+	cudaFree(dev_a);
+	cudaFree(dev_b);
+	cudaFree(dev_c);
 }
 
 void test()
