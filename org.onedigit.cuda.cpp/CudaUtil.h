@@ -12,6 +12,7 @@ class CudaUtil {
 public:
 	CudaUtil();
 	virtual ~CudaUtil();
+	static void getDeviceProperties(int line, const char* file);
 	static void cudaCheckMalloc(void** ptr, size_t size, int line, const char* file);
 	static void cudaCheckMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, int line, const char* file);
 	static void cudaCheckLastError(int line, const char* file);

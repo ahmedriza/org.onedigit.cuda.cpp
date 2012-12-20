@@ -30,29 +30,8 @@ __global__ void vecAddDevice(int* a, int* b, int* c)
 	}
 }
 
-void getDevice()
-{
-	int count;
-	int error =	cudaGetDeviceCount(&count);
-    if (error != cudaSuccess) {
-        printf("cudaGetDeviceCount returned error code %d, line(%d)\n", error, __LINE__);
-        exit(EXIT_FAILURE);
-    }
-    std::cout << "Number of devices = " << count << std::endl;
-    cudaDeviceProp prop;
-    for (int i = 0; i < count; i++) {
-		error = cudaGetDeviceProperties(&prop, i);
-		if (error == cudaSuccess) {
-			std::cout << "Name: " << prop.name << std::endl;
-			std::cout << "Total Global Mem: " << prop.totalGlobalMem << std::endl;
-		}
-	}
-}
-
 void vecAdd()
 {
-	getDevice();
-
 	int* a = new int[N];
 	int* b = new int[N];
 	int* c = new int[N];
@@ -116,8 +95,6 @@ void vecAdd()
 
 void test()
 {
-	getDevice();
-
 	int c;
 	int* dev_c;
 	int error = cudaMalloc( (void**)&dev_c, sizeof(int) );

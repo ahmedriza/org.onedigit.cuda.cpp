@@ -29,6 +29,8 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 
 void testMatMul()
 {
+	CudaUtil::getDeviceProperties(__LINE__, __FILE__);
+
 	int height = 3, width = 3;
 	int size = height * width * sizeof(float);
 
