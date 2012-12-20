@@ -246,9 +246,18 @@ void testMatMul()
         printf("cudaMemcpy returned error code %d, line(%d)\n", error, __LINE__);
         exit(EXIT_FAILURE);
     }
-	
+	/*
 	for (int i = 0; i < height * width; i++) {
-		std::cout << C.elements[i] << std::endl;
+			std::cout << C.elements[i] << " ";
+	}
+		std::cout << std::endl;
+	*/	
+	
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			std::cout << C.elements[i * height + j] << " ";
+		}
+		std::cout << std::endl;
 	}
 }
 
