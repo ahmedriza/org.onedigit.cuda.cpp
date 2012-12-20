@@ -26,7 +26,7 @@ CudaUtil::~CudaUtil()
 void CudaUtil::getDeviceProperties(int line, const char* file)
 {
 	int count;
-	int error =	cudaGetDeviceCount(&count);
+	int error = cudaGetDeviceCount(&count);
 	if (error != cudaSuccess) {
 		std::ostringstream os;
 		os << "cudaGetDeviceCount returned error code " << error << ", line " << line << ", in file " << file;
