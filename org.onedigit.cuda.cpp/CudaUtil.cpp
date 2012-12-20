@@ -14,13 +14,11 @@
 
 CudaUtil::CudaUtil()
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 CudaUtil::~CudaUtil()
 {
-	// TODO Auto-generated destructor stub
+
 }
 
 void CudaUtil::getDeviceProperties(int line, const char* file)
