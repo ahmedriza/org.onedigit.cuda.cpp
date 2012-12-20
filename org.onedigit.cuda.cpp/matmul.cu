@@ -1,18 +1,6 @@
 #include <iostream>
 #include "CudaUtil.h"
-
-struct Matrix
-{
-	Matrix(int h, int w) : height(h), width(w)
-	{
-		int size = height * width * sizeof(float);
-		elements = (float*)malloc(size);
-		memset(elements, 0, size);
-	}
-	int height;
-	int width;
-	float* elements;
-};
+#include "Matrix.h"
 
 namespace {
 	void printMatrix(const Matrix& matrix)
@@ -55,7 +43,6 @@ void testMatMul()
 	B.elements[6] = 7.0; B.elements[7] = 8.0; B.elements[8] = 9.0;
 
 	Matrix C(height, width);
-
 	// Device matrices
 	Matrix d_A(height, width), d_B(height, width), d_C(height, width);
 
@@ -66,15 +53,12 @@ void testMatMul()
 		// copy to GPU
 		CudaUtil::cudaCheckMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
 		CudaUtil::cudaCheckMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
-
 		dim3 dimBlock(16, 16);
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
 		MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
-
 		// copy to CPU
 		CudaUtil::cudaCheckMemcpy(C.elements, d_C.elements, size, cudaMemcpyDeviceToHost, __LINE__, __FILE__);
-
 	} catch (const std::exception& ex) {
 		std::cerr << ex.what() << std::endl;
 		exit(EXIT_FAILURE);
