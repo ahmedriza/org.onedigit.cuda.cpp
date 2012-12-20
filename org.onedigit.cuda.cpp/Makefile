@@ -123,6 +123,7 @@ endif
 
 # Common includes and paths for CUDA
 INCLUDES      := -I$(CUDA_INC_PATH) -I. -I.. -I../../common/inc
+CXXFLAGS = $(INCLUDES)
 
 # Target rules
 all: build
@@ -132,7 +133,10 @@ build: matrixMul
 kernel.o: kernel.cu
 	$(NVCC) $(NVCCFLAGS) $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) $(INCLUDES) -o $@ -c $<
 
-matrixMul: kernel.o
+matmul.o: matmul.cu
+	$(NVCC) $(NVCCFLAGS) $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) $(INCLUDES) -o $@ -c $<
+
+matrixMul: kernel.o matmul.o CudaException.o CudaUtil.o Main.o
 	$(GCC) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 	mkdir -p ../../bin/$(OSLOWER)/$(TARGET)
 	cp $@ ../../bin/$(OSLOWER)/$(TARGET)
