@@ -18,6 +18,7 @@ CudaUtil::CudaUtil()
 
 CudaUtil::~CudaUtil()
 {
+
 }
 
 void CudaUtil::getDeviceProperties(int line, const char* file)
