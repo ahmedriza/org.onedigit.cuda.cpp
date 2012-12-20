@@ -56,7 +56,14 @@ endif
 DARWIN = $(strip $(findstring DARWIN, $(OSUPPER)))
 
 # Location of the CUDA Toolkit binaries and libraries
-CUDA_PATH       ?= /Developer/NVIDIA/CUDA-5.0
+OS := $(shell uname -s)
+ifeq ($(OS),Darwin)
+	CUDA_PATH       ?= /Developer/NVIDIA/CUDA-5.0
+endif
+ifeq ($(OS),Linux)
+	CUDA_PATH       ?= /usr/local/cuda-5.0
+endif
+
 CUDA_INC_PATH   ?= $(CUDA_PATH)/include
 CUDA_BIN_PATH   ?= $(CUDA_PATH)/bin
 ifneq ($(DARWIN),)
