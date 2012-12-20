@@ -11,3 +11,4 @@ org.onedigit.zookeeper.cpp.ncb
 *.ncb
 *.pdb
 kernel
+matrixMul
