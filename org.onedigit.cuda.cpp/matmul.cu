@@ -55,7 +55,7 @@ void testMatMul()
 		// copy to GPU
 		CudaUtil::cudaCheckMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
 		CudaUtil::cudaCheckMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
-		dim3 dimBlock(16, 16);
+		dim3 dimBlock(8, 8);
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
 		MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
