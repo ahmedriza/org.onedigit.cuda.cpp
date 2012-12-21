@@ -145,4 +145,4 @@ run: build
 	./matrixMul
 
 clean:
-	rm -f matrixMul kernel.o
+	rm -f matrixMul *.o
