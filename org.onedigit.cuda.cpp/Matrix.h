@@ -8,6 +8,8 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+#include <iostream>
+
 struct Matrix
 {
 	Matrix(int h, int w) : height(h), width(w)
@@ -20,5 +22,13 @@ struct Matrix
 	int width;
 	float* elements;
 };
+
+std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
+{
+	for (int i = 0; i < matrix.height * matrix.width; i++) {
+		os << matrix.elements[i] << " ";
+	}
+	return os;
+}
 
 #endif /* MATRIX_H_ */

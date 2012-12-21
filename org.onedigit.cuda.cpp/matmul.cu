@@ -12,7 +12,7 @@ namespace {
 				float error = fabs(v - 102.0);
 				if (error > 1.0e-6) {
 					std::cout << "FAILURE at: " << count << std::endl;
-					std::cout << v << std::endl;
+					std::cout << matrix << std::endl;
 					exit(EXIT_FAILURE);
 				}
 			}
