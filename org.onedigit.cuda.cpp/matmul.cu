@@ -5,12 +5,23 @@
 namespace {
 	void printMatrix(const Matrix& matrix)
 	{
+		static int count = 0;
 		for (int i = 0; i < matrix.height; i++) {
 			for (int j = 0; j < matrix.width; j++) {
-				std::cout << matrix.elements[i * matrix.height + j] << " ";
+				float v = matrix.elements[i * matrix.height + j];
+				if (i == 2 && j == 0) {
+					float error = fabs(v - 102.0);
+					if (error > 1.0e-6) {
+						std::cout << "FAILURE at: " << count << std::endl;
+						std::cout << v << std::endl;
+						exit(EXIT_FAILURE);
+					}
+				}
+				// std::cout << v << std::endl;
 			}
-			std::cout << std::endl;
+			// std::cout << std::endl;
 		}
+		count++;	
 	}
 }
 
@@ -29,7 +40,7 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 
 void testMatMul()
 {
-	CudaUtil::getDeviceProperties(__LINE__, __FILE__);
+	// CudaUtil::getDeviceProperties(__LINE__, __FILE__);
 
 	int height = 3, width = 3;
 	int size = height * width * sizeof(float);
@@ -55,7 +66,7 @@ void testMatMul()
 		// copy to GPU
 		CudaUtil::cudaCheckMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
 		CudaUtil::cudaCheckMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
-		dim3 dimBlock(8, 8);
+		dim3 dimBlock(16, 16);
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
 		MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
