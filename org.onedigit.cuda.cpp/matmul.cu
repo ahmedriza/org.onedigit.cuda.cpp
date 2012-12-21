@@ -6,6 +6,19 @@ namespace {
 	void printMatrix(const Matrix& matrix)
 	{
 		static int count = 0;
+		for (int i = 0; i < matrix.height * matrix.width; i++) {
+			if (i == 6) {
+				float v = matrix.elements[i];
+				float error = fabs(v - 102.0);
+				if (error > 1.0e-6) {
+					std::cout << "FAILURE at: " << count << std::endl;
+					std::cout << v << std::endl;
+					exit(EXIT_FAILURE);
+				}
+			}
+			// std::cout << matrix.elements[i] << std::endl;
+		}
+		/*
 		for (int i = 0; i < matrix.height; i++) {
 			for (int j = 0; j < matrix.width; j++) {
 				float v = matrix.elements[i * matrix.height + j];
@@ -21,14 +34,14 @@ namespace {
 			}
 			// std::cout << std::endl;
 		}
+		*/
 		count++;	
 	}
 }
 
 __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
-	// Each thread computes one element of C
-	// by accumulating results into Cvalue
+	// Each thread computes one element of C by accumulating results into Cvalue
 	float Cvalue = 0;
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
