@@ -47,9 +47,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(CUDA_PATH)/include"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -64,7 +66,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib"
+				AdditionalDependencies="cuda.lib cudart.lib"
 				AdditionalLibraryDirectories="&quot;$(CUDA_PATH_V5_0)\lib\$(PlatformName)&quot;"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
@@ -178,7 +180,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\CudaException.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CudaUtil.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\kernel.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\Main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\matmul.cu"
 				>
 			</File>
 		</Filter>
@@ -187,6 +205,18 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\CudaException.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CudaUtil.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Matrix.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

@@ -46,8 +46,10 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
 	if(row > A.height || col > B.width) return;
-	for (int e = 0; e < A.width; ++e)
+	for (int e = 0; e < A.width; ++e) {
+		// Cvalue += (A.elements[row * A.width + e]) * (B.elements[e * B.width + col]);
 		Cvalue += A.elements[row * A.width + e] * B.elements[e * B.width + col];
+	}
 	C.elements[row * C.width + col] = Cvalue;
 }
 
@@ -83,8 +85,13 @@ void testMatMul()
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
 		MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
+		cudaThreadSynchronize();
+		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
 		// copy to CPU
 		CudaUtil::cudaCheckMemcpy(C.elements, d_C.elements, size, cudaMemcpyDeviceToHost, __LINE__, __FILE__);
+		cudaFree(d_A.elements);
+		cudaFree(d_B.elements);
+		cudaFree(d_C.elements);
 	} catch (const std::exception& ex) {
 		std::cerr << ex.what() << std::endl;
 		exit(EXIT_FAILURE);
