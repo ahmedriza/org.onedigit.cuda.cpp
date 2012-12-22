@@ -3,19 +3,57 @@
 #include "Matrix.h"
 
 namespace {
+	// solution:
+	// 30 36 42 66 81 96 102 126 150
+	void checkError(int i, const Matrix& matrix, int count, float expected)
+	{
+		float v = matrix.elements[i];
+		float error = fabs(v - expected);
+		if (error > 1.0e-6) {
+			std::cout << "FAILURE at: " << count << std::endl;
+			std::cout << matrix << std::endl;
+			exit(EXIT_FAILURE);
+		}
+	}
+	void checkElement(int i, const Matrix& matrix, int count)
+	{
+		switch (i) {
+		case 0:
+			checkError(i, matrix, count, 30.0);
+			break;
+		case 1:
+			checkError(i, matrix, count, 36.0);
+			break;
+		case 2:
+			checkError(i, matrix, count, 42.0);
+			break;
+		case 3:
+			checkError(i, matrix, count, 66.0);
+			break;
+		case 4:
+			checkError(i, matrix, count, 81.0);
+			break;
+		case 5:
+			checkError(i, matrix, count, 96.0);
+			break;
+		case 6:
+			checkError(i, matrix, count, 102.0);
+			break;
+		case 7:
+			checkError(i, matrix, count, 126.0);
+			break;
+		case 8:
+			checkError(i, matrix, count, 150.0);
+			break;
+		}
+
+	}
+
 	void printMatrix(const Matrix& matrix)
 	{
 		static int count = 0;
 		for (int i = 0; i < matrix.height * matrix.width; i++) {
-			if (i == 6) {
-				float v = matrix.elements[i];
-				float error = fabs(v - 102.0);
-				if (error > 1.0e-6) {
-					std::cout << "FAILURE at: " << count << std::endl;
-					std::cout << matrix << std::endl;
-					exit(EXIT_FAILURE);
-				}
-			}
+			checkElement(i, matrix, count);
 			// std::cout << matrix.elements[i] << std::endl;
 		}
 		/*
