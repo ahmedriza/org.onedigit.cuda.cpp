@@ -84,10 +84,14 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 	float Cvalue = 0;
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
-	printf("row = %d, col = %d\n", row, col);
-	if(row > A.height || col > B.width) return;
+	if(row >= A.height || col >= B.width) return;
 	for (int e = 0; e < A.width; ++e) {
 		Cvalue += ((A.elements[row * A.width + e]) * (B.elements[e * B.width + col]));
+		/*
+		printf("A(%d,%d) = %f, B(%d,%d) = %f, Cvalue = %f\n", 
+			row, col, A.elements[row*A.width + e],
+			row, col, B.elements[e*B.width + col], Cvalue);
+		*/
 	}
 	C.elements[row * C.width + col] = Cvalue;
 }
