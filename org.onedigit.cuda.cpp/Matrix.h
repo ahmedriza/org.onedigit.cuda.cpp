@@ -12,15 +12,18 @@
 
 struct Matrix
 {
+	/*
 	Matrix(int h, int w) : height(h), width(w)
 	{
 		int size = height * width * sizeof(float);
 		elements = (float*)malloc(size);
 		memset(elements, 0, size);
 	}
+	*/
 	int height;
 	int width;
 	float* elements;
+	int stride;
 };
 
 std::ostream& operator<<(std::ostream& os, const Matrix& matrix)

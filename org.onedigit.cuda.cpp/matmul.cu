@@ -3,6 +3,8 @@
 #include "CudaUtil.h"
 #include "Matrix.h"
 
+#define BLOCK_SIZE 16
+
 namespace {
 	// solution:
 	// 30 36 42 66 81 96 102 126 150
@@ -78,6 +80,71 @@ namespace {
 	}
 }
 
+// Get a mtrix element
+__device__ float GetElement(const Matrix A, int row, int col)
+{
+	return A.elements[row * A.stride + col];
+}
+
+// Set a matrix element
+__device__ void SetElement(Matrix A, int row, int col, float value)
+{
+	A.elements[row * A.stride + col] = value;
+}
+
+// locate col sub-matrices to the right and row sub-matrices down
+// from the upper-left corner of A
+__device__ Matrix GetSubMatrix(Matrix A, int row, int col)
+{
+	Matrix Asub;
+	A.width = BLOCK_SIZE;
+	A.height = BLOCK_SIZE;
+	Asub.stride = A.stride;
+	Asub.elements = &A.elements[A.stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
+	return Asub;
+}
+
+__global__ void MatMultSharedKernel(Matrix A, Matrix B, Matrix C)
+{
+	int blockRow = blockIdx.y;
+	int blockCol = blockIdx.x;
+	// Each thread computes one sub-matrix Csub of C
+	Matrix Csub = GetSubMatrix(C, blockRow, blockCol);
+
+	// Each thread computes 1 element of Csub accumulating results into Cvalue
+	float Cvalue = 0.0;
+
+	// Thread row and column within Csub
+	int row = threadIdx.y, col = threadIdx.x;
+	// Loop over all the sub-matrices of A and B required to compute Csub
+	for (int m = 0; m < (A.width / BLOCK_SIZE); ++m) {
+		// Ge sub-matrices Asub of A and Bsub of B
+		Matrix Asub = GetSubMatrix(A, blockRow, m);
+		Matrix Bsub = GetSubMatrix(B, m, blockCol);
+
+		// Shared memory used to store Asub and Bsub respectively
+		__shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+		__shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+
+		// Load Asub and Bsub from device memory to shared memory
+		// Each thread loads one element of each sub-matrix
+		As[row][col] = GetElement(Asub, row, col);
+		Bs[row][col] = GetElement(Bsub, row, col);
+
+		__syncthreads();
+
+		// Multiply Asub and Bsub together
+		for (int e = 0; e < BLOCK_SIZE; ++e) {
+			Cvalue += As[row][e] * Bs[e][col];
+		}
+
+		__syncthreads();
+	}
+
+	// Each thread writes one element of Csub to memory
+	SetElement(Csub, row, col, Cvalue);
+}
+
 __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
 	// Each thread computes one element of C by accumulating results into Cvalue
@@ -103,19 +170,41 @@ void testMatMul()
 	int height = 3, width = 3;
 	int size = height * width * sizeof(float);
 
-	Matrix A(height, width);
+	Matrix A;
+	A.height = height;
+	A.width = width;
+	A.elements = (float*)malloc(size);
 	A.elements[0] = 1.0; A.elements[1] = 2.0; A.elements[2] = 3.0;
 	A.elements[3] = 4.0; A.elements[4] = 5.0; A.elements[5] = 6.0;
 	A.elements[6] = 7.0; A.elements[7] = 8.0; A.elements[8] = 9.0;
 
-	Matrix B(height, width);
+	Matrix B;
+	B.height = height;
+	B.width = width;
+	B.elements = (float*)malloc(size);
 	B.elements[0] = 1.0; B.elements[1] = 2.0; B.elements[2] = 3.0;
 	B.elements[3] = 4.0; B.elements[4] = 5.0; B.elements[5] = 6.0;
 	B.elements[6] = 7.0; B.elements[7] = 8.0; B.elements[8] = 9.0;
 
-	Matrix C(height, width);
+	Matrix C;
+	C.height = height;
+	C.width = width;
+	C.elements = (float*)malloc(size);
 	// Device matrices
-	Matrix d_A(height, width), d_B(height, width), d_C(height, width);
+	Matrix d_A;
+	d_A.height = height;
+	d_A.width = width;
+	d_A.elements = (float*)malloc(size);
+
+	Matrix d_B;
+	d_B.height = height;
+	d_B.width = width;
+	d_B.elements = (float*)malloc(size);
+
+	Matrix d_C;
+	d_C.height = height;
+	d_C.width = width;
+	d_C.elements = (float*)malloc(size);
 
 	try {
 		CudaUtil::cudaCheckMalloc((void**)&d_A.elements, size, __LINE__, __FILE__);
@@ -124,7 +213,7 @@ void testMatMul()
 		// copy to GPU
 		CudaUtil::cudaCheckMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
 		CudaUtil::cudaCheckMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
-		dim3 dimBlock(16, 16);
+		dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
 		MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
