@@ -3,11 +3,14 @@
 #include "CudaUtil.h"
 #include "Matrix.h"
 
+void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N);
+
 #define BLOCK_SIZE 16
 
 namespace {
 	// solution:
 	// 30 36 42 66 81 96 102 126 150
+#ifdef CHECK_MATRIX
 	void checkError(int i, const Matrix& matrix, int count, float expected)
 	{
 		float v = matrix.elements[i];
@@ -78,6 +81,7 @@ namespace {
 		*/
 		count++;	
 	}
+#endif
 }
 
 // Get a mtrix element
@@ -168,6 +172,7 @@ void testMatMul()
 {
 	// CudaUtil::getDeviceProperties(__LINE__, __FILE__);
 
+	/*
 	int height = 3, width = 3;
 	int size = height * width * sizeof(float);
 
@@ -206,6 +211,14 @@ void testMatMul()
 	d_C.height = height;
 	d_C.width = width;
 	d_C.elements = (float*)malloc(size);
+	*/
+
+	int N = 10000;
+	Matrix A, B, C;
+	allocateMatrices(A, B, C, N);
+	Matrix d_A, d_B, d_C;
+	allocateMatrices(d_A, d_B, d_C, N);
+	int size = N * N * sizeof(float);
 
 	try {
 		CudaUtil::cudaCheckMalloc((void**)&d_A.elements, size, __LINE__, __FILE__);
@@ -216,6 +229,7 @@ void testMatMul()
 		CudaUtil::cudaCheckMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
 		dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
+		std::cout << "Preparing to run kernel..." << std::endl;
 		MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
 		cudaThreadSynchronize();
@@ -231,4 +245,7 @@ void testMatMul()
 	}
 
 	// printMatrix(C);
+	std::cout << A.elements[N*N-1] << std::endl;
+	std::cout << B.elements[N*N-1] << std::endl;
+	std::cout << C.elements[N*N-1] << std::endl;
 }

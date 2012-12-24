@@ -51,13 +51,12 @@ void printMatrix(const Matrix& matrix)
 	}
 }
 
-void testHostMatMult()
+void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N)
 {
-	int N = 1000;
 	int size = N * N * sizeof(float);
-	Matrix A; A.width = N; A.height = N; A.elements = (float*)malloc(size);
-	Matrix B; B.width = N; B.height = N; B.elements = (float*)malloc(size);
-	Matrix C; C.width = N; C.height = N; C.elements = (float*)malloc(size);
+	A.width = N; A.height = N; A.elements = (float*)malloc(size);
+	B.width = N; B.height = N; B.elements = (float*)malloc(size);
+	C.width = N; C.height = N; C.elements = (float*)malloc(size);
 
 	/*
 	A.elements[0] = 1; A.elements[1] = 2; A.elements[2] = 3;
@@ -73,6 +72,13 @@ void testHostMatMult()
 		B.elements[i] = i;
 	}
 
+}
+
+void testHostMatMult()
+{
+	int N = 1000;
+	Matrix A, B, C;
+	allocateMatrices(A, B, C, N);
 	time_t start = time(0);
 	matMul(A, B, C, N);
 	time_t end = time(0);
@@ -80,4 +86,7 @@ void testHostMatMult()
 	std::cout << "Elapsed = " << elapsed << std::endl;
 
 	// printMatrix(C);
+	std::cout << A.elements[N*N-1] << std::endl;
+	std::cout << B.elements[N*N-1] << std::endl;
+	std::cout << C.elements[N*N-1] << std::endl;
 }
