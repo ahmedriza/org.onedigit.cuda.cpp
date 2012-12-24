@@ -26,12 +26,4 @@ struct Matrix
 	int stride;
 };
 
-std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
-{
-	for (int i = 0; i < matrix.height * matrix.width; i++) {
-		os << matrix.elements[i] << " ";
-	}
-	return os;
-}
-
 #endif /* MATRIX_H_ */

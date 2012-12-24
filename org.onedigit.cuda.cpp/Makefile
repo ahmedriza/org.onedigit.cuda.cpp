@@ -112,19 +112,23 @@ else
       NVCCFLAGS := -m64
 endif
 
+# dbg = 1
+
 # Debug build flags
 ifeq ($(dbg),1)
       CCFLAGS   += -g
+      CXXFLAGS  += -g
       NVCCFLAGS += -g -G
       TARGET    := debug
 else
       TARGET    := release
+      CXXFLAGS  += -O2
 endif
 
 
 # Common includes and paths for CUDA
 INCLUDES      := -I$(CUDA_INC_PATH) -I. -I.. -I../../common/inc
-CXXFLAGS = $(INCLUDES)
+CXXFLAGS	  += $(INCLUDES)
 
 # Target rules
 all: build
@@ -137,7 +141,7 @@ kernel.o: kernel.cu
 matmul.o: matmul.cu
 	$(NVCC) $(NVCCFLAGS) $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) $(INCLUDES) -o $@ -c $<
 
-matrixMul: kernel.o matmul.o CudaException.o CudaUtil.o Main.o
+matrixMul: kernel.o matmul.o CudaException.o CudaUtil.o Main.o Matrix.o
 	$(GCC) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 	mkdir -p ../../bin/$(OSLOWER)/$(TARGET)
 	cp $@ ../../bin/$(OSLOWER)/$(TARGET)

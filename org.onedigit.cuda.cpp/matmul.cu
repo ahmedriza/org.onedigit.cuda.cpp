@@ -14,7 +14,7 @@ namespace {
 		float error = fabs(v - expected);
 		if (error > 1.0e-6) {
 			std::cout << "FAILURE at: " << count << std::endl;
-			std::cout << matrix << std::endl;
+			// std::cout << matrix << std::endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -230,5 +230,5 @@ void testMatMul()
 		exit(EXIT_FAILURE);
 	}
 
-	printMatrix(C);
+	// printMatrix(C);
 }
