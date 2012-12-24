@@ -108,7 +108,8 @@ __global__ void MatMultSharedKernel(Matrix A, Matrix B, Matrix C)
 {
 	int blockRow = blockIdx.y;
 	int blockCol = blockIdx.x;
-	// Each thread computes one sub-matrix Csub of C
+
+	// Each thread block computes one sub-matrix Csub of C
 	Matrix Csub = GetSubMatrix(C, blockRow, blockCol);
 
 	// Each thread computes 1 element of Csub accumulating results into Cvalue
