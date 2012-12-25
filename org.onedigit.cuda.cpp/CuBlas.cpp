@@ -68,7 +68,7 @@ struct CublasGemm<float>
 
 void testCublas()
 {
-	typedef double Real;
+	typedef float Real;
 
 	Real *h_A, *h_B, *h_C, *d_A, *d_B, *d_C;
 	size_t size = N * N * sizeof(Real);
