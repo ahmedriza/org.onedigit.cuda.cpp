@@ -29,7 +29,6 @@ void testCublas()
 		float* h_B = CudaUtil::hostCheckMalloc<float>(size, __LINE__, __FILE__);
 		float* h_C = CudaUtil::hostCheckMalloc<float>(size, __LINE__, __FILE__);
 
-		std::cout << "Filling the matrices with test data" << std::endl;
 		// fill the matrices with test data
 		for (size_t i = 0; i < N*N; i++) {
 			h_A[i] = i; // rand() / (float)RAND_MAX;
@@ -37,23 +36,18 @@ void testCublas()
 			// h_C[i] = i; // rand() / (float)RAND_MAX;
 		}
 
-		std::cout << "Allocating device memory" << std::endl;
 		float* d_A = CudaUtil::cudaCheckMalloc<float>(size, __LINE__, __FILE__);
 		float* d_B = CudaUtil::cudaCheckMalloc<float>(size, __LINE__, __FILE__);
 		float* d_C = CudaUtil::cudaCheckMalloc<float>(size, __LINE__, __FILE__);
-		std::cout << "Device memory allocated" << std::endl;
 
-		std::cout << "Calling cublasSetVector" << std::endl;
 		CudaUtil::cublasCheckSetVector(N*N, sizeof(float), h_A, 1, d_A, 1, __LINE__, __FILE__);
 		CudaUtil::cublasCheckSetVector(N*N, sizeof(float), h_B, 1, d_B, 1, __LINE__, __FILE__);
 		// CudaUtil::cublasCheckSetVector(N*N, sizeof(float), h_C, 1, d_C, 1, __LINE__, __FILE__);
 
 		float alpha = 1.0f;
 		float beta = 0.0f;
-		std::cout << "Calling CUBLAS SGEMM" << std::endl;
 		cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
 		CudaUtil::checkCublasStatus(status, __LINE__, __FILE__);
-		std::cout << "CUBLAS SGEMM success" << std::endl;
 
 		// Read the results back
 		CudaUtil::cublasCheckGetVector(N*N, sizeof(float), d_C, 1, h_C, 1, __LINE__, __FILE__);
