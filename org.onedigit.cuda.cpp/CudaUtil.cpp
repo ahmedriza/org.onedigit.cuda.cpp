@@ -46,7 +46,7 @@ void CudaUtil::getDeviceProperties(int line, const char* file)
 		error = cudaGetDeviceProperties(&prop, i);
 		if (error == cudaSuccess) {
 			std::cout << "\tName: " << prop.name << std::endl;
-			std::cout << "Compute capability: " << prop.major << "." << prop.minor << std::endl;
+			std::cout << "\tCompute capability: " << prop.major << "." << prop.minor << std::endl;
 			// std::cout << "\tTotal Global Mem: " << prop.totalGlobalMem << std::endl;
 		}
 	}
