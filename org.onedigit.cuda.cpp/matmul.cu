@@ -213,7 +213,7 @@ void testMatMul()
 	d_C.elements = (float*)malloc(size);
 	*/
 
-	int N = 20000;
+	int N = 5000;
 	Matrix A, B, C;
 	allocateMatrices(A, B, C, N);
 	Matrix d_A, d_B, d_C;
