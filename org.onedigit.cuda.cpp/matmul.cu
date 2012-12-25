@@ -5,7 +5,7 @@
 
 void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N);
 
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 32
 
 namespace {
 	// solution:
@@ -213,7 +213,7 @@ void testMatMul()
 	d_C.elements = (float*)malloc(size);
 	*/
 
-	int N = 10000;
+	int N = 20000;
 	Matrix A, B, C;
 	allocateMatrices(A, B, C, N);
 	Matrix d_A, d_B, d_C;
@@ -221,8 +221,11 @@ void testMatMul()
 	int size = N * N * sizeof(float);
 
 	try {
+		std::cout << "Allocating A on device" << std::endl; 
 		CudaUtil::cudaCheckMalloc((void**)&d_A.elements, size, __LINE__, __FILE__);
+		std::cout << "Allocating B on device" << std::endl; 
 		CudaUtil::cudaCheckMalloc((void**)&d_B.elements, size, __LINE__, __FILE__);
+		std::cout << "Allocating C on device" << std::endl; 
 		CudaUtil::cudaCheckMalloc((void**)&d_C.elements, size, __LINE__, __FILE__);
 		// copy to GPU
 		CudaUtil::cudaCheckMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
