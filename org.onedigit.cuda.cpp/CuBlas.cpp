@@ -68,6 +68,7 @@ struct CublasGemm<float>
 
 void testCublas()
 {
+	CudaUtil::getDeviceProperties(__LINE__, __FILE__);
 	typedef float Real;
 
 	Real *h_A, *h_B, *h_C, *d_A, *d_B, *d_C;
@@ -103,9 +104,6 @@ void testCublas()
 
 		CublasGemm<Real> gemm;
 		cublasStatus_t status = gemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
-		// cublasStatus_t status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
-		// cublasStatus_t status = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
-
 		CudaUtil::checkCublasStatus(status, __LINE__, __FILE__);
 		std::cout << "Finished calling CUBLAS GEMM" << std::endl;
 		// cudaDeviceSynchronize();
