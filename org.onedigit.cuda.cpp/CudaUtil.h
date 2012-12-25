@@ -8,6 +8,7 @@
 #ifndef CUDAUTIL_H_
 #define CUDAUTIL_H_
 
+#include <stdlib.h>
 #include <sstream>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
