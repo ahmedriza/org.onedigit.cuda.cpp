@@ -76,7 +76,7 @@ void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N)
 
 void testHostMatMult()
 {
-	int N = 1000;
+	int N = 10000;
 	Matrix A, B, C;
 	allocateMatrices(A, B, C, N);
 	time_t start = time(0);
