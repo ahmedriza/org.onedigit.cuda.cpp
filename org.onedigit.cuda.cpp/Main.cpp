@@ -16,6 +16,7 @@ int main(int argc, char** argv)
 	// int N = 1000000;
 	// testMatMul();
 	// testHostMatMult();
+
 	testCublas();
 
 	return 0;
