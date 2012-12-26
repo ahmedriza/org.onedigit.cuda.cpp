@@ -54,9 +54,9 @@ void printMatrix(const Matrix& matrix)
 void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N)
 {
 	int size = N * N * sizeof(float);
-	A.width = N; A.height = N; A.elements = (float*)malloc(size);
-	B.width = N; B.height = N; B.elements = (float*)malloc(size);
-	C.width = N; C.height = N; C.elements = (float*)malloc(size);
+	A.width = N; A.height = N; A.elements = (float*)malloc(size); A.stride = A.width;
+	B.width = N; B.height = N; B.elements = (float*)malloc(size); B.stride = B.width;
+	C.width = N; C.height = N; C.elements = (float*)malloc(size); C.stride = C.width;
 
 	/*
 	A.elements[0] = 1; A.elements[1] = 2; A.elements[2] = 3;

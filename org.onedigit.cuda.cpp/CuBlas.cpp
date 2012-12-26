@@ -104,7 +104,7 @@ void testCublas()
 		std::cout << "Calling CUBLAS GEMM" << std::endl;
 
 		CublasGemm<Real> gemm;
-		int nIter = 5;
+		int nIter = 50;
 		for (int i = 0; i < nIter; i++) {
 			cublasStatus_t status = gemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
 			CudaUtil::checkCublasStatus(status, __LINE__, __FILE__);

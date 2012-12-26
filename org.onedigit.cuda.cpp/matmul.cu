@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include "CudaUtil.h"
 #include "Matrix.h"
+#include "CudaEventRecord.h"
 
 void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N);
 
-#define BLOCK_SIZE 32
+#define BLOCK_SIZE 16
 
 namespace {
 	// solution:
@@ -87,6 +88,7 @@ namespace {
 // Get a mtrix element
 __device__ float GetElement(const Matrix A, int row, int col)
 {
+	// printf("GetElement, row = %d, col = %d\n", row, col);
 	return A.elements[row * A.stride + col];
 }
 
@@ -213,7 +215,7 @@ void testMatMul()
 	d_C.elements = (float*)malloc(size);
 	*/
 
-	int N = 5000;
+	int N = 4096;
 	Matrix A, B, C;
 	allocateMatrices(A, B, C, N);
 	Matrix d_A, d_B, d_C;
@@ -221,6 +223,8 @@ void testMatMul()
 	int size = N * N * sizeof(float);
 
 	try {
+		CudaEventRecord eventRecord;
+
 		std::cout << "Allocating A on device" << std::endl; 
 		CudaUtil::cudaCheckMalloc((void**)&d_A.elements, size, __LINE__, __FILE__);
 		std::cout << "Allocating B on device" << std::endl; 
@@ -233,8 +237,14 @@ void testMatMul()
 		dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
 		std::cout << "Preparing to run kernel..." << std::endl;
-		MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
-		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
+
+		int nIter = 1;
+		for (int i = 0; i < nIter; i++) {
+			// MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
+			// Shared memory kernel is faster, almost twice as fast on Quadro 4000
+			MatMultSharedKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
+			CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
+		}
 		cudaThreadSynchronize();
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
 		// copy to CPU
@@ -242,6 +252,16 @@ void testMatMul()
 		cudaFree(d_A.elements);
 		cudaFree(d_B.elements);
 		cudaFree(d_C.elements);
+
+	    // Compute and print the performance
+		eventRecord.stop();
+		float msecTotal = eventRecord.getTotalTime();
+	    std::cout << "Toatl time = " << msecTotal << " ms" << std::endl;
+	    float msecPerMatrixMul = msecTotal / nIter;
+	    double flopsPerMatrixMul = 2.0 * (double)N * (double)N * (double)N;
+	    double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
+	    std::cout << "Performance = " << gigaFlops << " GFlops/s" << std::endl;
+
 	} catch (const std::exception& ex) {
 		std::cerr << ex.what() << std::endl;
 		exit(EXIT_FAILURE);
