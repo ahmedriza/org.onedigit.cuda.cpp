@@ -217,28 +217,38 @@ void testMatMul()
 
 	int N = 4096;
 	Matrix A, B, C;
-	allocateMatrices(A, B, C, N);
 	Matrix d_A, d_B, d_C;
-	allocateMatrices(d_A, d_B, d_C, N);
-	int size = N * N * sizeof(float);
+
+	// int size = N * N * sizeof(float);
+
+	allocateMatrices(A, B, C, N);
+
+	d_A.width = N; d_A.height = N; d_A.stride = N;
+	d_B.width = N; d_B.height = N; d_B.stride = N;
+	d_C.width = N; d_C.height = N; d_C.stride = N;
 
 	try {
 		CudaEventRecord eventRecord;
 
-		std::cout << "Allocating A on device" << std::endl; 
-		CudaUtil::cudaCheckMalloc((void**)&d_A.elements, size, __LINE__, __FILE__);
-		std::cout << "Allocating B on device" << std::endl; 
-		CudaUtil::cudaCheckMalloc((void**)&d_B.elements, size, __LINE__, __FILE__);
-		std::cout << "Allocating C on device" << std::endl; 
-		CudaUtil::cudaCheckMalloc((void**)&d_C.elements, size, __LINE__, __FILE__);
+		// CudaUtil::cudaCheckMalloc((void**)&d_A.elements, size, __LINE__, __FILE__);
+		// CudaUtil::cudaCheckMalloc((void**)&d_B.elements, size, __LINE__, __FILE__);
+		// CudaUtil::cudaCheckMalloc((void**)&d_C.elements, size, __LINE__, __FILE__);
+		size_t pitch;
+		CudaUtil::cudaCheckMallocPitch((void**)&d_A.elements, &pitch, N * sizeof(float), N, __LINE__, __FILE__);
+		CudaUtil::cudaCheckMallocPitch((void**)&d_B.elements, &pitch, N * sizeof(float), N, __LINE__, __FILE__);
+		CudaUtil::cudaCheckMallocPitch((void**)&d_C.elements, &pitch, N * sizeof(float), N, __LINE__, __FILE__);
+
 		// copy to GPU
-		CudaUtil::cudaCheckMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
-		CudaUtil::cudaCheckMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
+		// CudaUtil::cudaCheckMemcpy(d_A.elements, A.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
+		// CudaUtil::cudaCheckMemcpy(d_B.elements, B.elements, size, cudaMemcpyHostToDevice, __LINE__, __FILE__);
+		CudaUtil::cudaCheckMemcpy2D(d_A.elements, pitch, A.elements, pitch, N * sizeof(float), N, cudaMemcpyHostToDevice, __LINE__, __FILE__);
+		CudaUtil::cudaCheckMemcpy2D(d_B.elements, pitch, B.elements, pitch, N * sizeof(float), N, cudaMemcpyHostToDevice, __LINE__, __FILE__);
+
 		dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 dimGrid( (B.width + dimBlock.x - 1)/dimBlock.x, (A.height + dimBlock.y - 1)/dimBlock.y );
 		std::cout << "Preparing to run kernel..." << std::endl;
 
-		int nIter = 1;
+		int nIter = 10;
 		for (int i = 0; i < nIter; i++) {
 			// MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 			// Shared memory kernel is faster, almost twice as fast on Quadro 4000
@@ -248,7 +258,9 @@ void testMatMul()
 		cudaThreadSynchronize();
 		CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
 		// copy to CPU
-		CudaUtil::cudaCheckMemcpy(C.elements, d_C.elements, size, cudaMemcpyDeviceToHost, __LINE__, __FILE__);
+		// CudaUtil::cudaCheckMemcpy(C.elements, d_C.elements, size, cudaMemcpyDeviceToHost, __LINE__, __FILE__);
+		CudaUtil::cudaCheckMemcpy2D(C.elements, pitch, d_C.elements, pitch, N * sizeof(float), N, cudaMemcpyDeviceToHost, __LINE__, __FILE__);
+
 		cudaFree(d_A.elements);
 		cudaFree(d_B.elements);
 		cudaFree(d_C.elements);
@@ -256,8 +268,8 @@ void testMatMul()
 	    // Compute and print the performance
 		eventRecord.stop();
 		float msecTotal = eventRecord.getTotalTime();
-	    std::cout << "Toatl time = " << msecTotal << " ms" << std::endl;
 	    float msecPerMatrixMul = msecTotal / nIter;
+	    std::cout << "Toatl time = " << msecTotal << " ms, time per matrix multiplication = " << msecPerMatrixMul << " ms" << std::endl;
 	    double flopsPerMatrixMul = 2.0 * (double)N * (double)N * (double)N;
 	    double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
 	    std::cout << "Performance = " << gigaFlops << " GFlops/s" << std::endl;
@@ -271,4 +283,8 @@ void testMatMul()
 	std::cout << A.elements[N*N-1] << std::endl;
 	std::cout << B.elements[N*N-1] << std::endl;
 	std::cout << C.elements[N*N-1] << std::endl;
+
+	cudaFreeHost(A.elements);
+	cudaFreeHost(B.elements);
+	cudaFreeHost(C.elements);
 }

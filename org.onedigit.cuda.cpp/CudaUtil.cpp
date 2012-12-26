@@ -80,12 +80,33 @@ void CudaUtil::cudaCheckMalloc(void** ptr, size_t size, int line, const char* fi
     }
 }
 
+void CudaUtil::cudaCheckMallocPitch(void** ptr, size_t* pitch, size_t width, size_t height, int line, const char* file)
+{
+	int error = cudaMallocPitch(ptr, pitch, width, height);
+    if (error != cudaSuccess) {
+    	std::ostringstream os;
+    	os << "cudaMallocPitch returned error code " << error << ", line " << line << ", in file " << file;
+    	throw CudaException(os.str());
+    }
+}
+
 void CudaUtil::cudaCheckMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, int line, const char* file)
 {
 	int error = cudaMemcpy(dst, src, count, kind);
     if (error != cudaSuccess) {
     	std::ostringstream os;
     	os << "cudaMemcpy returned error code " << error << ", line " << line << ", in file " << file;
+    	throw CudaException(os.str());
+    }
+}
+
+void CudaUtil::cudaCheckMemcpy2D(void *dst, size_t dpitch, const void *src, size_t spitch,
+		size_t width, size_t height, enum cudaMemcpyKind kind, int line, const char* file)
+{
+	int error = cudaMemcpy2D(dst, dpitch, src, spitch, width, height, kind);
+    if (error != cudaSuccess) {
+    	std::ostringstream os;
+    	os << "cudaMemcpy2D returned error code " << error << ", line " << line << ", in file " << file;
     	throw CudaException(os.str());
     }
 }
