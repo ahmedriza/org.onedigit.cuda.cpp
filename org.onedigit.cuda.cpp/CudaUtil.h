@@ -50,7 +50,12 @@ public:
 	}
 
 	static void cudaCheckMalloc(void** ptr, size_t size, int line, const char* file);
+	static void cudaCheckMallocPitch(void** ptr, size_t* pitch, size_t width, size_t height, int line, const char* file);
+
 	static void cudaCheckMemcpy(void *dst, const void *src, size_t count, enum cudaMemcpyKind kind, int line, const char* file);
+	static void cudaCheckMemcpy2D(void *dst, size_t dpitch, const void *src, size_t spitch,
+			size_t width, size_t height, enum cudaMemcpyKind kind, int line, const char* file);
+
 	static void cudaCheckLastError(int line, const char* file);
 
 	static void checkCublasStatus(cublasStatus_t status, int line, const char* file);

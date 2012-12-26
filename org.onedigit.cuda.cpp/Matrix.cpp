@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <time.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include "CudaUtil.h"
 #include "Matrix.h"
 
 std::ostream& operator<<(std::ostream& os, const Matrix& matrix)
@@ -54,9 +57,29 @@ void printMatrix(const Matrix& matrix)
 void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N)
 {
 	int size = N * N * sizeof(float);
-	A.width = N; A.height = N; A.elements = (float*)malloc(size); A.stride = A.width;
-	B.width = N; B.height = N; B.elements = (float*)malloc(size); B.stride = B.width;
-	C.width = N; C.height = N; C.elements = (float*)malloc(size); C.stride = C.width;
+	A.width = N; A.height = N;
+	// A.elements = (float*)malloc(size);
+	cudaError_t error = cudaMallocHost((void**)&A.elements, size);
+	if (error != cudaSuccess) {
+		std::cerr << "cudaMallocHost failed with error " << error << std::endl;
+	}
+	A.stride = A.width;
+
+	B.width = N; B.height = N;
+	// B.elements = (float*)malloc(size);
+	error = cudaMallocHost((void**)&B.elements, size);
+	if (error != cudaSuccess) {
+		std::cerr << "cudaMallocHost failed with error " << error << std::endl;
+	}
+	B.stride = B.width;
+
+	C.width = N; C.height = N;
+	// C.elements = (float*)malloc(size);
+	error = cudaMallocHost((void**)&C.elements, size);
+	if (error != cudaSuccess) {
+		std::cerr << "cudaMallocHost failed with error " << error << std::endl;
+	}
+	C.stride = C.width;
 
 	/*
 	A.elements[0] = 1; A.elements[1] = 2; A.elements[2] = 3;
