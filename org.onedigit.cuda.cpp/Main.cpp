@@ -15,11 +15,11 @@ int main(int argc, char** argv)
 	// test();
 	// int N = 1000000;
 
-	//testMatMul();
+	testMatMul();
 
 	// testHostMatMult();
 
-	testCublas();
+	// testCublas();
 
 	return 0;
 }
