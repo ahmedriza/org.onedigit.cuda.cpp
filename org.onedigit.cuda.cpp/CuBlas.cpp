@@ -4,7 +4,7 @@
 #include "CudaUtil.h"
 #include "CudaEventRecord.h"
 
-#define N 7000
+#define N 4096
 
 template <typename T>
 void printMatrix(T* matrix)
@@ -126,8 +126,8 @@ void testCublas()
 	    // Compute and print the performance
 		eventRecord.stop();
 		float msecTotal = eventRecord.getTotalTime();
-	    std::cout << "Toatl time = " << msecTotal << " ms" << std::endl;
 	    float msecPerMatrixMul = msecTotal / nIter;
+	    std::cout << "Toatl time = " << msecTotal << " ms, time per matrix multiplication = " << msecPerMatrixMul << " ms" << std::endl;
 	    double flopsPerMatrixMul = 2.0 * (double)N * (double)N * (double)N;
 	    double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
 	    std::cout << "Performance = " << gigaFlops << " GFlops/s" << std::endl;
