@@ -12,7 +12,7 @@
 #include "CudaEventRecord.h"
 #include "CudaException.h"
 
-CudaEventRecord::CudaEventRecord()
+CudaEventRecord::CudaEventRecord() : msecTotal_(0.0), stopped_(false)
 {
 	cudaError_t error = cudaEventCreate(&start_);
     if (error != cudaSuccess)
@@ -41,29 +41,39 @@ CudaEventRecord::CudaEventRecord()
 
 CudaEventRecord::~CudaEventRecord()
 {
-    // Record the stop event
-	cudaError_t error = cudaEventRecord(stop_, NULL);
-	if (error != cudaSuccess)
-	    {
+	if (!stopped_) {
+		stop();
+	}
+}
+
+void CudaEventRecord::stop()
+{
+	if (!stopped_) {
+	    // Record the stop event
+		cudaError_t error = cudaEventRecord(stop_, NULL);
+		if (error != cudaSuccess)
+		    {
+		    	std::ostringstream os;
+		    	os << "Failed to record stop event, error code: " << cudaGetErrorString(error);
+		    	throw CudaException(os.str());
+		    }
+
+	    // Wait for the stop event to complete
+	    error = cudaEventSynchronize(stop_);
+	    if (error != cudaSuccess) {
 	    	std::ostringstream os;
-	    	os << "Failed to record stop event, error code: " << cudaGetErrorString(error);
+	    	os << "Failed to synchronize on the stop event, error code: " << cudaGetErrorString(error);
 	    	throw CudaException(os.str());
 	    }
 
-    // Wait for the stop event to complete
-    error = cudaEventSynchronize(stop_);
-    if (error != cudaSuccess) {
-    	std::ostringstream os;
-    	os << "Failed to synchronize on the stop event, error code: " << cudaGetErrorString(error);
-    	throw CudaException(os.str());
-    }
-
-    msecTotal_ = 0.0f;
-    error = cudaEventElapsedTime(&msecTotal_, start_, stop_);
-    if (error != cudaSuccess) {
-    	std::ostringstream os;
-    	os << "Failed to get time elapsed between events, error code: " << cudaGetErrorString(error);
-    	throw CudaException(os.str());
-    }
+	    msecTotal_ = 0.0f;
+	    error = cudaEventElapsedTime(&msecTotal_, start_, stop_);
+	    if (error != cudaSuccess) {
+	    	std::ostringstream os;
+	    	os << "Failed to get time elapsed between events, error code: " << cudaGetErrorString(error);
+	    	throw CudaException(os.str());
+	    }
+	    stopped_ = true;
+	}
 }
 

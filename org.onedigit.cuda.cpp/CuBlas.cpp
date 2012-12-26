@@ -73,6 +73,7 @@ void testCublas()
 
 	Real *h_A, *h_B, *h_C, *d_A, *d_B, *d_C;
 	size_t size = N * N * sizeof(Real);
+
 	try {
 		CudaEventRecord eventRecord;
 		cublasHandle_t handle = CudaUtil::cublasInit();
@@ -103,7 +104,7 @@ void testCublas()
 		std::cout << "Calling CUBLAS GEMM" << std::endl;
 
 		CublasGemm<Real> gemm;
-		int nIter = 10;
+		int nIter = 5;
 		for (int i = 0; i < nIter; i++) {
 			cublasStatus_t status = gemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
 			CudaUtil::checkCublasStatus(status, __LINE__, __FILE__);
@@ -123,6 +124,7 @@ void testCublas()
 		CudaUtil::cublasClose(handle);
 
 	    // Compute and print the performance
+		eventRecord.stop();
 		float msecTotal = eventRecord.getTotalTime();
 	    std::cout << "Toatl time = " << msecTotal << " ms" << std::endl;
 	    float msecPerMatrixMul = msecTotal / nIter;
@@ -134,5 +136,4 @@ void testCublas()
 		std::cerr << ex.what() << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
 }

@@ -15,11 +15,13 @@ class CudaEventRecord {
 public:
 	CudaEventRecord();
 	virtual ~CudaEventRecord();
+	void stop();
 	float getTotalTime() { return msecTotal_; }
 private:
 	 cudaEvent_t start_;
 	 cudaEvent_t stop_;
 	 float msecTotal_;
+	 bool stopped_;
 };
 
 #endif /* CUDAEVENTRECORD_H_ */
