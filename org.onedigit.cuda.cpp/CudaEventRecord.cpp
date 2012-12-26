@@ -58,14 +58,12 @@ CudaEventRecord::~CudaEventRecord()
     	throw CudaException(os.str());
     }
 
-    float msecTotal = 0.0f;
-    error = cudaEventElapsedTime(&msecTotal, start_, stop_);
+    msecTotal_ = 0.0f;
+    error = cudaEventElapsedTime(&msecTotal_, start_, stop_);
     if (error != cudaSuccess) {
     	std::ostringstream os;
     	os << "Failed to get time elapsed between events, error code: " << cudaGetErrorString(error);
     	throw CudaException(os.str());
     }
-
-    std::cout << "Toatl time = " << msecTotal << " ms" << std::endl;
 }
 

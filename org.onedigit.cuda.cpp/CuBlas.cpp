@@ -103,8 +103,11 @@ void testCublas()
 		std::cout << "Calling CUBLAS GEMM" << std::endl;
 
 		CublasGemm<Real> gemm;
-		cublasStatus_t status = gemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
-		CudaUtil::checkCublasStatus(status, __LINE__, __FILE__);
+		int nIter = 10;
+		for (int i = 0; i < nIter; i++) {
+			cublasStatus_t status = gemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N, d_B, N, &beta, d_C, N);
+			CudaUtil::checkCublasStatus(status, __LINE__, __FILE__);
+		}
 		std::cout << "Finished calling CUBLAS GEMM" << std::endl;
 		// cudaDeviceSynchronize();
 		// Read the results back
@@ -118,6 +121,15 @@ void testCublas()
 		CudaUtil::cudaCheckFree(d_B, __LINE__, __FILE__);
 		CudaUtil::cudaCheckFree(d_C, __LINE__, __FILE__);
 		CudaUtil::cublasClose(handle);
+
+	    // Compute and print the performance
+		float msecTotal = eventRecord.getTotalTime();
+	    std::cout << "Toatl time = " << msecTotal << " ms" << std::endl;
+	    float msecPerMatrixMul = msecTotal / nIter;
+	    double flopsPerMatrixMul = 2.0 * (double)N * (double)N * (double)N;
+	    double gigaFlops = (flopsPerMatrixMul * 1.0e-9f) / (msecPerMatrixMul / 1000.0f);
+	    std::cout << "Performance = " << gigaFlops << " GFlops/s" << std::endl;
+
 	} catch (std::exception& ex) {
 		std::cerr << ex.what() << std::endl;
 		exit(EXIT_FAILURE);
