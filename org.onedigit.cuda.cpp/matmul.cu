@@ -6,7 +6,7 @@
 
 void allocateMatrices(Matrix& A, Matrix& B, Matrix& C, int N);
 
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 32
 
 namespace {
 	// solution:
