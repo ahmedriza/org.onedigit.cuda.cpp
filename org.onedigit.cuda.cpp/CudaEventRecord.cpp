@@ -42,7 +42,12 @@ CudaEventRecord::CudaEventRecord() : msecTotal_(0.0), stopped_(false)
 CudaEventRecord::~CudaEventRecord()
 {
 	if (!stopped_) {
-		stop();
+		try {
+			stop();
+		} catch (CudaException& ex) {
+			std::cerr << ex.what() << std::endl;
+			exit(EXIT_FAILURE);
+		}
 	}
 }
 
