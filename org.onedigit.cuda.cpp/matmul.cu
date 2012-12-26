@@ -250,9 +250,9 @@ void testMatMul()
 
 		int nIter = 10;
 		for (int i = 0; i < nIter; i++) {
-			MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
+			// MatMulKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 			// Shared memory kernel is faster, almost twice as fast on Quadro 4000
-			// MatMultSharedKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
+			MatMultSharedKernel<<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
 			CudaUtil::cudaCheckLastError(__LINE__, __FILE__);
 		}
 		cudaThreadSynchronize();
